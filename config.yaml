@@ -23,4 +23,14 @@ api_port:  3200
 api_token: ''
 
 # tuling plugin configration
+# 格式:字符串
 tuling_api_key: 'c268de590aed467dba359955708c38c8'
+tuling_reply_prefix: '🤖: '
+# 规则格式~ json(规则:正则表达式,子查询索引:整数)
+# 正则表达式~ 没有:() 所有:(.*) 多项:(a|b|c)
+tuling_whitelist_group: '{"rule":"(202892015|287156946|417727807)","matchindex":1}'
+tuling_whitelist_user: '{"rule":"(.*)","matchindex":1}'
+tuling_whitelist_keyword: '{"rule":"(@谷妹|@谷哥)(.*)","matchindex":2}'
+tuling_blacklist_group: '{"rule":"()","matchindex":1}'
+tuling_blacklist_user: '{"rule":"(903338544)","matchindex":1}'
+tuling_blacklist_keyword: '{"rule":"(报点|报时)(.*)","matchindex":1}'
