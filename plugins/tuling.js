@@ -3,8 +3,6 @@
   var querystring = require('querystring');
   var log = new (require('log'))('debug');
 
-  var API_KEY = 'c268de590aed467dba359955708c38c8';
-
   var get_Message = function(info,callback){
     var contents = querystring.stringify(info);
     var options = {
@@ -70,7 +68,7 @@
    */
   module.exports = function(content, send, robot, message) {
     var info = {
-      key: API_KEY,
+      key: robot.config.tuling_api_key,
       info: content,
       userid: message.from_uin
     };

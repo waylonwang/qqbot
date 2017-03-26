@@ -21,3 +21,6 @@ plugins:
 # apiserver plugin configration
 api_port:  3200
 api_token: ''
+
+# tuling plugin configration
+tuling_api_key: 'c268de590aed467dba359955708c38c8'
