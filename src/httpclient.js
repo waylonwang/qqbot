@@ -8,8 +8,79 @@
 
   var all_cookies = [];
 
+  var get_cookie = function(name,domain){
+    var regexp,
+      str_exp = '^' + name + '=([^;]*);';
+    if (domain !=null && domain!='') str_exp = str_exp + '.*DOMAIN=' + domain.replace(/(\*)/g,'\\*').replace(/(\.)/g,'\\.') + ';';
+
+    eval('regexp =/' + str_exp + '/g');
+    for (var ck in all_cookies) {
+      try {
+        var v = regexp.exec(all_cookies[ck])[1];
+        if (v != '')
+          return v;
+      }catch (undefined){
+
+      }
+    }
+    return '';
+  };
+
   var get_cookies = function() {
       return all_cookies;
+  };
+
+  var get_domain_cookies_string = function (domains) {
+    var regexp,str_exp,subck,cookie_map = {},cks = [];
+
+    var dms = domains.split('|');
+    //STEP 1:定义了DOMAIN的键值进行匹配
+    for (var domain in dms){
+      for (var ck in all_cookies) {
+        try {
+          //$0:result $1:'DOMAIN=' $2:domain
+          str_exp = '(DOMAIN=)(' + dms[domain].replace(/(\*)/g,'\\*').replace(/(\.)/g,'\\.') + ');';
+          eval('regexp =/' + str_exp + '/');
+          subck = regexp.exec(all_cookies[ck]);
+          //存在域名且域名匹配时
+          if (!(subck[1] == null || subck[1] == '') && !(subck[2] == null || subck[2] == '')) {
+            //$0:result $1:name $2:value
+            str_exp = '^([^=]*)=([^;]*);';
+            eval('regexp =/' + str_exp + '/');
+            subck = regexp.exec(all_cookies[ck]);
+            //存在键值且键值匹配时,如cookie_map中还未记录则添加
+            if (!(subck[1] == null || subck[1] == '') && !(subck[1] in cookie_map))
+              cookie_map[subck[1]] = subck[2];
+          }
+        }catch (undefined){
+        }
+      }
+    }
+    //STEP 2:没有定义DOMAIN的键值进行匹配
+    for (var ck in all_cookies) {
+      try {
+        //$0:result $1:'DOMAIN=' $2:domain
+        str_exp = '(DOMAIN=)';
+        eval('regexp =/' + str_exp + '/');
+        var subck = regexp.exec(all_cookies[ck]);
+        //存在未明确域名时
+        if (subck[1]== null || subck[1]==''){
+          //$0:result $1:name $2:value
+          str_exp = '^([^=]*)=([^;]*);';
+          eval('regexp =/' + str_exp + '/');
+          subck = regexp.exec(all_cookies[ck]);
+          //存在键值且键值匹配时,如cookie_map中还未记录则添加
+          if (!(subck[1] == null || subck[1] == '') && !(subck[1] in cookie_map))
+            cookie_map[subck[1]]=subck[2];
+        }
+      }catch (undefined){
+      }
+    }
+
+    for(var k in cookie_map) {
+      cks.push(k + '=' + cookie_map[k] + ';');
+    }
+    return cks.join(' ');
   };
 
   var get_cookies_string = function() {
@@ -52,7 +123,8 @@
       return http_or_https.get(url_or_options, function(resp){
           if(pre_callback !== undefined) pre_callback(resp);
 
-          update_cookies(resp.headers['set-cookie']);
+          if (resp.headers['set-cookie'])
+            update_cookies(resp.headers['set-cookie']);
 
           var res = resp;
           var body = '';
@@ -127,8 +199,9 @@
       append = aurl.query ? '&' : '?';
       options.path += append + query;
     }
-    options.headers['Cookie'] = get_cookies_string();
-    options.headers['Referer'] = 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2';
+    //Cookie、Referer如果未传值则用默认的web qq的内容,有值则不处理,这样兼容性更好
+    if (!('Cookie' in options.headers)) options.headers['Cookie'] = get_domain_cookies_string('ptlogin2.qq.com|web2.qq.com|qq.com');
+    if (!('Referer' in options.headers)) options.headers['Referer'] = 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2';
     //options.headers['Referer'] = 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1';
     options.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.86 Safari/537.36';
     if(process.env.DEBUG) {
@@ -193,7 +266,9 @@
     global_cookies: global_cookies,
     get_cookies: get_cookies,
     update_cookies: update_cookies,
+    get_cookie: get_cookie,
     get_cookies_string: get_cookies_string,
+    get_domain_cookies_string: get_domain_cookies_string,
     request: http_request,
     get: http_get,
     post: http_post,

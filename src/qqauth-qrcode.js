@@ -111,7 +111,7 @@ function getUserHome() {
         });
         return img_server.listen(port);
     } else {
-        return;
+
     }
   };
 
@@ -137,12 +137,12 @@ function getUserHome() {
       host: 's.web2.qq.com',
       path: '/api/getvfwebqq?ptwebqq=' + ptwebqq + '&clientid=' + client_id + '&psessionid=&t=' + Math.random(),
       headers: {
-        'Cookie': client.get_cookies_string(),
+        'Cookie': client.get_domain_cookies_string('ptlogin2.qq.com|web2.qq.com|qq.com'),
         'Origin': 'http://s.web2.qq.com',
         'Referer': 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1',
       }
     }, function(err, resp, body) {
-      //console.log(body);
+      console.log(body);
       var ret = JSON.parse(body);
       return callback(ret);
     });
@@ -164,6 +164,7 @@ function getUserHome() {
       path: '/channel/login2',
       method: 'POST',
       headers: {
+        'Cookie': client.get_domain_cookies_string('ptlogin2.qq.com|web2.qq.com|qq.com'),
         'Origin': 'http://d1.web2.qq.com',
         'Referer': 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2',
       }
@@ -181,7 +182,7 @@ function getUserHome() {
       host: 'd1.web2.qq.com',
       path: '/channel/get_online_buddies2?vfwebqq=' + vfwebqq + '&clientid=' + client_id + '&psessionid=' + psessionid + '&t=' + Math.random(),
       headers: {
-        'Cookie': client.get_cookies_string(),
+        'Cookie': client.get_domain_cookies_string('ptlogin2.qq.com|web2.qq.com|qq.com'),
         'Origin': 'http://d1.web2.qq.com',
         'Referer': 'http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2',
       }
@@ -224,7 +225,7 @@ function getUserHome() {
         return log.error(ret);
       }
     });
-  }
+  };
 
   var wait_scan_qrcode = function(callback) {
     log.info("登录 step1 等待二维码校验结果");
@@ -245,7 +246,7 @@ function getUserHome() {
 
         } else {
             log.error("登录 step1 failed", ret);
-            return;
+
         }
     });
   };
@@ -265,7 +266,7 @@ function getUserHome() {
 
           return wait_scan_qrcode(callback);
       });
-  }
+  };
 
   /*
       全局登录函数，如果有验证码会建立一个 http-server ，同时写入 tmp/*.jpg (osx + open. 操作)

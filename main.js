@@ -5,6 +5,7 @@
 (function() {
   var log = new (require('log'))('debug');
   var auth = require("./src/qqauth-qrcode");
+  var qzone = require("./src/qqauth-qzone");
   var api = require("./src/qqapi");
   var QQBot = require("./src/qqbot");
   var defaults = require('./src/defaults');
@@ -26,7 +27,9 @@
         defaults.data(KEY_COOKIES, cookies);
         defaults.data(KEY_AUTH, auth_info);
         defaults.save();
-        return callback(cookies, auth_info);
+        qzone.login_token(cookies,auth_info,function (cookies) {
+          return callback(cookies, auth_info);
+        });
       });
     } else {
       cookies = defaults.data(KEY_COOKIES);
@@ -61,7 +64,8 @@
               return bot.runloop();
             } else {
               log.error("获取信息失败，请重新运行");
-              process.exit(1);
+              return bot.runloop();
+              // process.exit(1);
             }
           });
         }
